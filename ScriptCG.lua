@@ -1,4 +1,4 @@
--- Admin Code Executor GUI Completo
+-- Admin Code Executor GUI Completo com Botão de Abertura
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
@@ -22,6 +22,25 @@ local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "AdminExecutor"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
+
+-- Botão de abertura no canto superior esquerdo
+local openButton = Instance.new("TextButton")
+openButton.Name = "OpenButton"
+openButton.Size = UDim2.new(0, 40, 0, 40)
+openButton.Position = UDim2.new(0, 10, 0, 10)
+openButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+openButton.Text = "🔧"
+openButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+openButton.TextScaled = true
+openButton.Font = Enum.Font.GothamBold
+openButton.BorderSizePixel = 0
+openButton.Visible = false -- Inicialmente invisível
+openButton.Parent = screenGui
+
+-- Bordas arredondadas para o botão de abertura
+local openButtonCorner = Instance.new("UICorner")
+openButtonCorner.CornerRadius = UDim.new(0, 10)
+openButtonCorner.Parent = openButton
 
 -- Frame principal
 local mainFrame = Instance.new("Frame")
@@ -630,10 +649,10 @@ changeKeyCorner.Parent = changeKeyBtn
 
 -- Informações adicionais
 local infoLabel = Instance.new("TextLabel")
-infoLabel.Size = UDim2.new(1, -20, 0, 100)
+infoLabel.Size = UDim2.new(1, -20, 0, 120)
 infoLabel.Position = UDim2.new(0, 10, 0, 150)
 infoLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-infoLabel.Text = "ℹ️ INFORMAÇÕES:\n\n• Scripts são salvos por jogador\n• Use o botão '–' para ocultar a GUI\n• Pressione a tecla configurada para mostrar/ocultar\n• O scroll funciona no editor de código"
+infoLabel.Text = "ℹ️ INFORMAÇÕES:\n\n• Scripts são salvos por jogador\n• Use o botão '–' para ocultar a GUI\n• Pressione a tecla configurada para mostrar/ocultar\n• O scroll funciona no editor de código\n• Botão 🔧 no canto superior esquerdo abre a GUI"
 infoLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
 infoLabel.Font = Enum.Font.Gotham
 infoLabel.TextSize = 12
@@ -987,10 +1006,11 @@ end
 
 -- Função para toggle da GUI
 local function toggleGUI()
-    if not mainFrame then return end
+    if not mainFrame or not openButton then return end
     
     isGUIVisible = not isGUIVisible
     mainFrame.Visible = isGUIVisible
+    openButton.Visible = not isGUIVisible
     
     if isGUIVisible then
         spawn(function()
@@ -1001,10 +1021,31 @@ local function toggleGUI()
                 tween:Play()
             end)
         end)
+    else
+        spawn(function()
+            local success, _ = pcall(function()
+                local tween = TweenService:Create(openButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+                    Size = UDim2.new(0, 45, 0, 45)
+                })
+                tween:Play()
+                
+                wait(0.1)
+                
+                local tween2 = TweenService:Create(openButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+                    Size = UDim2.new(0, 40, 0, 40)
+                })
+                tween2:Play()
+            end)
+        end)
     end
 end
 
 -- CONECTAR EVENTOS
+
+-- Evento do botão de abertura
+openButton.MouseButton1Click:Connect(function()
+    spawn(toggleGUI)
+end)
 
 -- Eventos das abas
 for i, btn in ipairs(tabButtons) do
@@ -1117,6 +1158,7 @@ addHoverEffect(closeButton, Color3.fromRGB(220, 50, 50), Color3.fromRGB(240, 70,
 addHoverEffect(hideButton, Color3.fromRGB(100, 150, 200), Color3.fromRGB(120, 170, 220))
 addHoverEffect(changeKeyBtn, Color3.fromRGB(100, 150, 200), Color3.fromRGB(120, 170, 220))
 addHoverEffect(searchButton, Color3.fromRGB(100, 150, 255), Color3.fromRGB(120, 170, 255))
+addHoverEffect(openButton, Color3.fromRGB(30, 30, 30), Color3.fromRGB(50, 50, 50))
 
 -- Inicializar na primeira aba
 local success, _ = pcall(function()
@@ -1134,6 +1176,7 @@ spawn(function()
     print("   • Hub de scripts pesquisável")
     print("   • Script '99 Dias na Floresta' incluído")
     print("   • Botão de ocultar (tecla configurável)")
+    print("   • Botão de abertura no canto superior esquerdo")
     print("   • Tecla atual: " .. (toggleKey and toggleKey.Name or "RightShift"))
     print("🌐 Use o campo LoadString para executar scripts de URLs!")
 end)
