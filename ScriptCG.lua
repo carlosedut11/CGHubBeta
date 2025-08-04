@@ -64,7 +64,7 @@ titleLabel.Name = "Title"
 titleLabel.Size = UDim2.new(1, -80, 0, 50)
 titleLabel.Position = UDim2.new(0, 0, 0, 0)
 titleLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-titleLabel.Text = "🔧 Admin Code Executor Pro"
+titleLabel.Text = "🔧 CG Admin Code Executor Externo Alfa 🔧"
 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 titleLabel.TextScaled = true
 titleLabel.Font = Enum.Font.GothamBold
@@ -474,8 +474,7 @@ local hubScripts = {
     {name = "Dex Explorer", code = "loadstring(game:HttpGet('https://raw.githubusercontent.com/infyiff/backup/main/dex.lua'))()", description = "Explorer avançado do jogo", color = Color3.fromRGB(100, 150, 255)},
     {name = "Universal ESP", code = "loadstring(game:HttpGet('https://raw.githubusercontent.com/ic3w0lf22/Unnamed-ESP/master/UnnamedESP.lua'))()", description = "ESP para visualizar jogadores", color = Color3.fromRGB(255, 255, 100)},
     {name = "Orca Hub", code = "loadstring(game:HttpGetAsync('https://raw.githubusercontent.com/richie0866/orca/master/public/latest.lua'))()", description = "Hub de ferramentas", color = Color3.fromRGB(150, 100, 255)},
-    {name = "Carlllosviera", code = "require(3465).carlllosviera", description = "Script clássico require", color = Color3.fromRGB(255, 100, 100)},
-    {name = "SweetBaby", code = "require(4859311019).sweetbaby", description = "Script SweetBaby", color = Color3.fromRGB(255, 150, 200)}
+    {name = "Beta Gui Fly/Speed", code = "loadstring(game:HttpGetAsync('https://raw.githubusercontent.com/carlosedut11/BetaGuiFly-Speed/refs/heads/main/Beta%20Gui%20Fly/MenuGuiCGbetaFlySpeedNoclip.lua'))()"", description = "Script clássico require", color = Color3.fromRGB(255, 100, 100)},
 }
 
 local function createHubScriptButton(script, index)
