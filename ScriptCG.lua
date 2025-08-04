@@ -456,8 +456,8 @@ end
 
 -- Scripts famosos atualizados
 local quickScripts = {
-    {name = "Carlllosviera", code = "require(3465).carlllosviera", color = Color3.fromRGB(255, 100, 100)},
-    {name = "SweetBaby", code = "require(4859311019).sweetbaby", color = Color3.fromRGB(255, 150, 200)},
+    {name = "Beta Gui Fly/Speed", code = "loadstring(game:HttpGetAsync('https://raw.githubusercontent.com/carlosedut11/BetaGuiFly-Speed/refs/heads/main/Beta%20Gui%20Fly/MenuGuiCGbetaFlySpeedNoclip.lua'))()", color = Color3.fromRGB(255, 100, 100)},
+    {name = "99 Dias na Floresta", code = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/BaconBossScript/BeeconHub/main/BeeconHub"))()', color = Color3.fromRGB(34, 139, 34)},
     {name = "Infinite Yield", code = "loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()", color = Color3.fromRGB(100, 255, 100)}
 }
 
