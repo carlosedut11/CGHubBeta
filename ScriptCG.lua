@@ -1,4 +1,4 @@
--- Admin Code Executor GUI Completo com Botão de Abertura
+-- Admin Code Executor GUI Completo com Botão de Abertura - CORRIGIDO
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
@@ -197,7 +197,7 @@ codeBox.Parent = codeScrollFrame
 -- Ajustar tamanho do scroll baseado no texto
 codeBox:GetPropertyChangedSignal("Text"):Connect(function()
     spawn(function()
-        wait(0.1) -- Pequena espera para garantir que os elementos estão carregados
+        wait(0.1)
         
         if codeBox and codeBox.Parent and codeScrollFrame then
             local success, textBounds = pcall(function()
@@ -228,7 +228,45 @@ buttonFrame.Position = UDim2.new(0, 0, 1, -315)
 buttonFrame.BackgroundTransparency = 1
 buttonFrame.Parent = executorFrame
 
--- Botões do executor (mesmo código anterior)
+-- Label de status
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Name = "StatusLabel"
+statusLabel.Size = UDim2.new(1, 0, 0, 25)
+statusLabel.Position = UDim2.new(0, 0, 0, 40)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "Pronto para executar código"
+statusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.TextSize = 12
+statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+statusLabel.Parent = buttonFrame
+
+-- Função para mostrar status
+local function showStatus(message, color)
+    if not statusLabel then return end
+    
+    local success, _ = pcall(function()
+        statusLabel.Text = message or "Status desconhecido"
+        statusLabel.TextColor3 = color or Color3.fromRGB(150, 150, 150)
+        
+        spawn(function()
+            wait(3)
+            if statusLabel and statusLabel.Parent then
+                local tween = TweenService:Create(statusLabel, TweenInfo.new(1), {TextTransparency = 1})
+                tween:Play()
+                tween.Completed:Connect(function()
+                    if statusLabel and statusLabel.Parent then
+                        statusLabel.Text = "Pronto para executar código"
+                        statusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+                        statusLabel.TextTransparency = 0
+                    end
+                end)
+            end
+        end)
+    end)
+end
+
+-- Botões do executor
 local executeButton = Instance.new("TextButton")
 executeButton.Name = "ExecuteButton"
 executeButton.Size = UDim2.new(0, 120, 0, 35)
@@ -377,6 +415,45 @@ scriptsTitle.Font = Enum.Font.GothamBold
 scriptsTitle.TextSize = 14
 scriptsTitle.Parent = scriptsFrame
 
+-- Função para executar código
+local function executeCode()
+    if not codeBox or not codeBox.Text then 
+        showStatus("❌ Erro: Código não encontrado!", Color3.fromRGB(200, 50, 50))
+        return 
+    end
+    
+    local success, error = pcall(function()
+        local code = codeBox.Text
+        if code and code ~= "" then
+            loadstring(code)()
+        end
+    end)
+    
+    if success then
+        showStatus("✅ Código executado com sucesso!", Color3.fromRGB(50, 200, 50))
+    else
+        showStatus("❌ Erro: " .. tostring(error or "Erro desconhecido"), Color3.fromRGB(200, 50, 50))
+    end
+end
+
+-- Função para executar script diretamente
+local function executeScript(code)
+    if not code or code == "" then
+        showStatus("❌ Erro: Script vazio!", Color3.fromRGB(200, 50, 50))
+        return
+    end
+    
+    local success, error = pcall(function()
+        loadstring(code)()
+    end)
+    
+    if success then
+        showStatus("✅ Script executado com sucesso!", Color3.fromRGB(50, 200, 50))
+    else
+        showStatus("❌ Erro: " .. tostring(error or "Erro desconhecido"), Color3.fromRGB(200, 50, 50))
+    end
+end
+
 -- Scripts famosos atualizados
 local quickScripts = {
     {name = "Carlllosviera", code = "require(3465).carlllosviera", color = Color3.fromRGB(255, 100, 100)},
@@ -474,8 +551,36 @@ local hubScripts = {
     {name = "Dex Explorer", code = "loadstring(game:HttpGet('https://raw.githubusercontent.com/infyiff/backup/main/dex.lua'))()", description = "Explorer avançado do jogo", color = Color3.fromRGB(100, 150, 255)},
     {name = "Universal ESP", code = "loadstring(game:HttpGet('https://raw.githubusercontent.com/ic3w0lf22/Unnamed-ESP/master/UnnamedESP.lua'))()", description = "ESP para visualizar jogadores", color = Color3.fromRGB(255, 255, 100)},
     {name = "Orca Hub", code = "loadstring(game:HttpGetAsync('https://raw.githubusercontent.com/richie0866/orca/master/public/latest.lua'))()", description = "Hub de ferramentas", color = Color3.fromRGB(150, 100, 255)},
-    {name = "Beta Gui Fly/Speed", code = "loadstring(game:HttpGetAsync('https://raw.githubusercontent.com/carlosedut11/BetaGuiFly-Speed/refs/heads/main/Beta%20Gui%20Fly/MenuGuiCGbetaFlySpeedNoclip.lua'))()"", description = "Script clássico require", color = Color3.fromRGB(255, 100, 100)},
+    {name = "Beta Gui Fly/Speed", code = "loadstring(game:HttpGetAsync('https://raw.githubusercontent.com/carlosedut11/BetaGuiFly-Speed/refs/heads/main/Beta%20Gui%20Fly/MenuGuiCGbetaFlySpeedNoclip.lua'))()", description = "Script clássico require", color = Color3.fromRGB(255, 100, 100)},
 }
+
+-- Função para trocar abas (precisa ser declarada antes do uso)
+local function switchTab(tabIndex)
+    -- Resetar cores dos botões
+    for i, btn in ipairs(tabButtons) do
+        btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    end
+    
+    -- Ocultar todos os frames
+    executorFrame.Visible = false
+    hubFrame.Visible = false
+    if savedFrame then savedFrame.Visible = false end
+    if configFrame then configFrame.Visible = false end
+    
+    -- Mostrar frame selecionado e destacar botão
+    tabButtons[tabIndex].BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    
+    if tabIndex == 1 then
+        executorFrame.Visible = true
+    elseif tabIndex == 2 then
+        hubFrame.Visible = true
+    elseif tabIndex == 3 and savedFrame then
+        savedFrame.Visible = true
+        if updateSavedScripts then updateSavedScripts() end
+    elseif tabIndex == 4 and configFrame then
+        configFrame.Visible = true
+    end
+end
 
 local function createHubScriptButton(script, index)
     local scriptFrame = Instance.new("Frame")
@@ -548,7 +653,6 @@ local function createHubScriptButton(script, index)
     
     loadBtn.MouseButton1Click:Connect(function()
         codeBox.Text = script.code
-        -- Mudar para aba executor
         switchTab(1)
     end)
     
@@ -665,19 +769,6 @@ local infoCorner = Instance.new("UICorner")
 infoCorner.CornerRadius = UDim.new(0, 8)
 infoCorner.Parent = infoLabel
 
--- Label de status
-local statusLabel = Instance.new("TextLabel")
-statusLabel.Name = "StatusLabel"
-statusLabel.Size = UDim2.new(1, 0, 0, 25)
-statusLabel.Position = UDim2.new(0, 0, 0, 40)
-statusLabel.BackgroundTransparency = 1
-statusLabel.Text = "Pronto para executar código"
-statusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
-statusLabel.Font = Enum.Font.Gotham
-statusLabel.TextSize = 12
-statusLabel.TextXAlignment = Enum.TextXAlignment.Left
-statusLabel.Parent = buttonFrame
-
 -- Função para executar loadstring
 local function executeLoadstring()
     if not urlBox or not urlBox.Text then
@@ -709,74 +800,6 @@ local function executeLoadstring()
     end
 end
 
--- Função para mostrar status
-local function showStatus(message, color)
-    if not statusLabel then return end
-    
-    local success, _ = pcall(function()
-        statusLabel.Text = message or "Status desconhecido"
-        statusLabel.TextColor3 = color or Color3.fromRGB(150, 150, 150)
-        
-        spawn(function()
-            wait(3)
-            if statusLabel and statusLabel.Parent then
-                local tween = TweenService:Create(statusLabel, TweenInfo.new(1), {TextTransparency = 1})
-                tween:Play()
-                tween.Completed:Connect(function()
-                    if statusLabel and statusLabel.Parent then
-                        statusLabel.Text = "Pronto para executar código"
-                        statusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
-                        statusLabel.TextTransparency = 0
-                    end
-                end)
-            end
-        end)
-    end)
-end
-
--- Função para executar código
-function executeCode()
-    if not codeBox or not codeBox.Text then 
-        showStatus("❌ Erro: Código não encontrado!", Color3.fromRGB(200, 50, 50))
-        return 
-    end
-    
-    local success, error = pcall(function()
-        local code = codeBox.Text
-        if code and code ~= "" then
-            if code:match("require%(%d+%)") then
-                loadstring(code)()
-            else
-                loadstring(code)()
-            end
-        end
-    end)
-    
-    if success then
-        showStatus("✅ Código executado com sucesso!", Color3.fromRGB(50, 200, 50))
-    else
-        showStatus("❌ Erro: " .. tostring(error or "Erro desconhecido"), Color3.fromRGB(200, 50, 50))
-    end
-end
-
--- Função para executar script diretamente
-function executeScript(code)
-    if not code or code == "" then
-        showStatus("❌ Erro: Script vazio!", Color3.fromRGB(200, 50, 50))
-        return
-    end
-    
-    local success, error = pcall(function()
-        loadstring(code)()
-    end)
-    
-    if success then
-        showStatus("✅ Script executado com sucesso!", Color3.fromRGB(50, 200, 50))
-    else
-        showStatus("❌ Erro: " .. tostring(error or "Erro desconhecido"), Color3.fromRGB(200, 50, 50))
-    end
-end
-
 -- Função para salvar script
 local function saveScript()
     if not codeBox or not codeBox.Text then
@@ -795,7 +818,7 @@ local function saveScript()
         end)
         
         if success then
-            updateSavedScripts()
+            if updateSavedScripts then updateSavedScripts() end
             showStatus("💾 Script salvo: " .. scriptName, Color3.fromRGB(100, 100, 200))
         else
             showStatus("❌ Erro ao salvar script!", Color3.fromRGB(200, 50, 50))
@@ -928,34 +951,6 @@ function updateSavedScripts()
     savedScrollFrame.CanvasSize = UDim2.new(0, 0, 0, #savedScripts * 90)
 end
 
--- Função para trocar abas
-function switchTab(tabIndex)
-    -- Resetar cores dos botões
-    for i, btn in ipairs(tabButtons) do
-        btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    end
-    
-    -- Ocultar todos os frames
-    executorFrame.Visible = false
-    hubFrame.Visible = false
-    savedFrame.Visible = false
-    configFrame.Visible = false
-    
-    -- Mostrar frame selecionado e destacar botão
-    tabButtons[tabIndex].BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    
-    if tabIndex == 1 then
-        executorFrame.Visible = true
-    elseif tabIndex == 2 then
-        hubFrame.Visible = true
-    elseif tabIndex == 3 then
-        savedFrame.Visible = true
-        updateSavedScripts()
-    elseif tabIndex == 4 then
-        configFrame.Visible = true
-    end
-end
-
 -- Função para pesquisar scripts
 local function searchScripts()
     if not searchBox or not hubScrollFrame then return end
@@ -968,7 +963,7 @@ local function searchScripts()
                 local nameLabel = child:FindFirstChild("TextLabel")
                 if nameLabel and nameLabel.Text then
                     local scriptName = nameLabel.Text:lower()
-                    child.Visible = scriptName:find(searchTerm) ~= nil or searchTerm == ""
+                    child.Visible = searchTerm == "" or scriptName:find(searchTerm) ~= nil
                 end
             end
         end
